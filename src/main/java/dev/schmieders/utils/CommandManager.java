@@ -5,6 +5,7 @@ import java.util.List;
 import dev.schmieders.commands.music.Current;
 import dev.schmieders.commands.music.Pause;
 import dev.schmieders.commands.music.Play;
+import dev.schmieders.commands.music.Queue;
 import dev.schmieders.commands.music.Resume;
 import dev.schmieders.commands.music.Skip;
 import dev.schmieders.commands.music.Stop;
@@ -69,6 +70,9 @@ public class CommandManager {
 
       this.jda.upsertCommand("current", "Zeigt den aktuellen Song an.").queue();
       this.jda.addEventListener(new Current());
+
+      this.jda.upsertCommand("queue", "Zeigt die aktuelle Warteschlange an.").queue();
+      this.jda.addEventListener(new Queue());
    }
 
    private void upsertPresetCommands() {

@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.AudioManager;
 
 public class Play extends ListenerAdapter {
 
@@ -41,10 +40,7 @@ public class Play extends ListenerAdapter {
          return;
       }
 
-      if (!voiceState.inAudioChannel()) {
-         AudioManager audioManager = event.getGuild().getAudioManager();
-         audioManager.openAudioConnection(channel);
-      }
+      event.getGuild().getAudioManager().openAudioConnection(channel);
 
       String search = event.getOption("suchbegriff").getAsString();
       PlayerManager.getInstance().loadAndPlay(event,
