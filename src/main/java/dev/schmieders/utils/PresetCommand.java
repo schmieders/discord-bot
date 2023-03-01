@@ -34,10 +34,8 @@ public class PresetCommand {
          return false;
       }
 
-      if (!voiceState.inAudioChannel()) {
-         AudioManager audioManager = event.getGuild().getAudioManager();
-         audioManager.openAudioConnection(channel);
-      }
+      AudioManager audioManager = event.getGuild().getAudioManager();
+      audioManager.openAudioConnection(channel);
 
       return true;
    }
