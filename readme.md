@@ -31,4 +31,6 @@
 
 ## Future TODOs
 - Localization
+- Advanced Queue
+- Button to remove song if incorrect
 - More utility commands / features

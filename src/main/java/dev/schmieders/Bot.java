@@ -1,6 +1,6 @@
 package dev.schmieders;
 
-import dev.schmieders.listeners.ChannelLeaveListener;
+import dev.schmieders.listeners.ChannelUpdateListener;
 import dev.schmieders.listeners.JoinListener;
 import dev.schmieders.utils.CommandManager;
 import net.dv8tion.jda.api.JDA;
@@ -34,7 +34,7 @@ public class Bot {
 
    private void registerEventListeners() {
       this.JDA.addEventListener(new JoinListener());
-      this.JDA.addEventListener(new ChannelLeaveListener());
+      this.JDA.addEventListener(new ChannelUpdateListener());
    }
 
 }

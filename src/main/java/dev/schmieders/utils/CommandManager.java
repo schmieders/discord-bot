@@ -54,6 +54,9 @@ public class CommandManager {
       this.jda
             .upsertCommand("play", "Fügt einen neuen Song zur Warteschlange hinzu.")
             .addOption(OptionType.STRING, "suchbegriff", "Titel, Autor oder anderer Suchbegriff", true).queue();
+      this.jda
+            .upsertCommand("p", "Fügt einen neuen Song zur Warteschlange hinzu.")
+            .addOption(OptionType.STRING, "suchbegriff", "Titel, Autor oder anderer Suchbegriff", true).queue();
       this.jda.addEventListener(new Play());
 
       this.jda.upsertCommand("stop", "Beendet die Wiedergabe.").queue();

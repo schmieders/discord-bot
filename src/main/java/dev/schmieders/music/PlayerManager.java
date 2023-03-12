@@ -1,5 +1,6 @@
 package dev.schmieders.music;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(SlashCommandInteractionEvent event, String trackUrl) {
+    public void loadAndPlay(SlashCommandInteractionEvent event, String trackUrl, boolean reply) {
         final GuildMusicManager musicManager = this.getMusicManager(event.getGuild());
 
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
@@ -45,11 +46,16 @@ public class PlayerManager {
             public void trackLoaded(AudioTrack audioTrack) {
                 musicManager.scheduler.queue(audioTrack);
 
-                event.reply("**").addContent(audioTrack.getInfo().title)
-                        .addContent("** von **")
-                        .addContent(audioTrack.getInfo().author)
-                        .addContent("** wurde erfolgreich zur Warteschlange hinzugefügt.")
-                        .queue();
+                if (reply) {
+                    event.reply("**").addContent(audioTrack.getInfo().title)
+                            .addContent("** von **")
+                            .addContent(audioTrack.getInfo().author)
+                            .addContent("** wurde erfolgreich zur Warteschlange hinzugefügt.")
+                            .addContent(String.format(
+                                    " (%s)",
+                                    new SimpleDateFormat("mm:ss").format(audioTrack.getDuration())))
+                            .queue();
+                }
             }
 
             @Override
@@ -58,23 +64,37 @@ public class PlayerManager {
 
                 if (!tracks.isEmpty()) {
                     musicManager.scheduler.queue(tracks.get(0));
-                    event.reply("**")
-                            .addContent(tracks.get(0).getInfo().title)
-                            .addContent("** von **")
-                            .addContent(tracks.get(0).getInfo().author)
-                            .addContent("** wurde erfolgreich zur Warteschlange hinzugefügt.")
-                            .queue();
+
+                    if (reply)
+                        event.reply("**")
+                                .addContent(tracks.get(0).getInfo().title)
+                                .addContent("** von **")
+                                .addContent(tracks.get(0).getInfo().author)
+                                .addContent("** wurde erfolgreich zur Warteschlange hinzugefügt.")
+                                .queue();
+                } else {
+                    System.err.println("Empty playlist was loaded.");
+
+                    if (reply)
+                        event.reply("Ich konnte diesen Song leider nicht finden...").queue();
                 }
             }
 
             @Override
             public void noMatches() {
-                event.reply("Ich konnte leider keine Ergebinsse finden...");
+                System.err.println("Couldn't find song for search: " + trackUrl);
+
+                if (reply)
+                    event.reply("Ich konnte leider keine Ergebinsse finden...").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException e) {
-                event.reply("Die Suchergebnisse sind leider nicht erreichbar...");
+                System.err.println("Couldn't load song for search: " + trackUrl);
+                System.err.println(e.getMessage());
+
+                if (reply)
+                    event.reply("Die Suchergebnisse sind leider nicht erreichbar...").queue();
             }
 
         });

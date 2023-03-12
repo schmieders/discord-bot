@@ -1,11 +1,13 @@
 package dev.schmieders.commands.music;
 
+import java.io.IOException;
+
 import dev.schmieders.music.PlayerManager;
+import dev.schmieders.spotify.SpotfiyLoader;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -13,7 +15,7 @@ public class Play extends ListenerAdapter {
 
    @Override
    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-      if (!event.getName().equalsIgnoreCase("play"))
+      if (!event.getName().equalsIgnoreCase("play") && !event.getName().equalsIgnoreCase("p"))
          return;
 
       Member member = event.getMember();
@@ -43,17 +45,41 @@ public class Play extends ListenerAdapter {
       event.getGuild().getAudioManager().openAudioConnection(channel);
 
       String search = event.getOption("suchbegriff").getAsString();
-      PlayerManager.getInstance().loadAndPlay(event,
-            search.startsWith("https://") ? search : String.format("ytsearch:%s audio", search));
+
+      if (isSpotifyURL(search)) {
+         event.deferReply();
+
+         SpotfiyLoader loader = SpotfiyLoader.getInstance();
+         try {
+            loader.loadFromSpotify(event, search, isSpotifyPlaylistURL(search));
+         } catch (IOException e) {
+            e.printStackTrace();
+            event.reply("Die angegebene Spotify-Playlist konnte nicht geladen werden.").queue();
+         }
+      } else {
+         PlayerManager.getInstance().loadAndPlay(
+               event,
+               search.startsWith("https://") ? search : String.format("ytsearch:%s audio", search),
+               true);
+      }
    }
 
-   @Override
-   public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
-      if (!event.getMember().equals(event.getGuild().getSelfMember()))
-         return;
+   private boolean isSpotifyURL(String url) {
+      url = url.toLowerCase();
+      if (!url.contains("https://"))
+         return false;
 
-      if (event.getGuild().getSelfMember().getVoiceState().inAudioChannel())
-         event.getGuild().getSelfMember().deafen(true).queue();
+      if (!url.contains("spotify.com/"))
+         return false;
+
+      return true;
+   }
+
+   private boolean isSpotifyPlaylistURL(String url) {
+      if (!url.toLowerCase().contains("spotify.com/playlist"))
+         return false;
+
+      return true;
    }
 
 }

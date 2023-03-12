@@ -1,6 +1,7 @@
 package dev.schmieders.commands.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
 import dev.schmieders.music.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -40,10 +41,8 @@ public class Current extends ListenerAdapter {
          return;
       }
 
-      String title = audioPlayer.getPlayingTrack().getInfo().title;
-      String author = audioPlayer.getPlayingTrack().getInfo().author;
-
-      event.reply(String.format("Aktuell wird **%s** von **%s** abgespielt.", title, author)).queue();
+      AudioTrackInfo track = audioPlayer.getPlayingTrack().getInfo();
+      event.reply(String.format("Aktuell wird **%s** von **%s** abgespielt.", track.title, track.author)).queue();
    }
 
 }

@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class Queue extends ListenerAdapter {
 
@@ -37,7 +36,7 @@ public class Queue extends ListenerAdapter {
       GuildVoiceState voiceState = member.getVoiceState();
       VoiceChannel channel = member.getVoiceState().getChannel().asVoiceChannel();
       if (!voiceState.inAudioChannel() || !selfVoiceState.getChannel().asVoiceChannel().equals(channel)) {
-         event.reply("Du musst in meinem Kanal sein um einen Song zu überspringen.").setEphemeral(true).queue();
+         event.reply("Du musst in meinem Kanal sein um die Warteschlange anzuzeigen.").setEphemeral(true).queue();
          return;
       }
 
@@ -56,6 +55,10 @@ public class Queue extends ListenerAdapter {
       embed.setTitle(String.format("%d Songs in der Warteschlange", queue.size()));
       embed.setColor(Color.LIGHT_GRAY);
 
+      AudioTrackInfo track = audioPlayer.getPlayingTrack().getInfo();
+      embed.setDescription(
+            String.format("Aktuell wird **%s** von **%s** abgespielt.", track.title, track.author));
+
       for (int i = 1; i < queue.size() + 1 && i < 25; i++) {
          AudioTrackInfo info = queue.toArray(new AudioTrack[0])[i - 1].getInfo();
          embed.addField(String.format("%d. %s", i, info.title),
@@ -63,10 +66,12 @@ public class Queue extends ListenerAdapter {
                false);
       }
 
-      embed.setFooter(String.format("Seite 1 von %d (Seiten funktionieren noch nicht)", (queue.size() / 25) + 1));
+      embed.setFooter(String.format("Seite 1 von %d (Seiten funktionieren noch nicht)", queue.size() / 25));
 
       if (queue.size() > 25) {
-         event.replyEmbeds(embed.build()).addActionRow(Button.primary("page_2", "➤")).queue();
+         event.replyEmbeds(embed.build())
+               // .addActionRow(Button.primary("page_2", "➤"))
+               .queue();
       } else {
          event.replyEmbeds(embed.build()).queue();
       }
